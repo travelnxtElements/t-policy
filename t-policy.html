@@ -34,7 +34,7 @@
                     <template is="dom-if" if="[[item.policies.length]]">
                         <div class="font-16 border-bottom margin-bottom">[[item.type]]</div>
                         <template is="dom-repeat" items="{{item.policies}}" as="policy">
-                            <div class="font-12 margin-bottom">
+                            <div class="font-12 margin-bottom-medium">
                                 <template is="juicy-html" content$="[[policy]]" ></template>                        
                             </div>
                         </template>             
