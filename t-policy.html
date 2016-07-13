@@ -1,0 +1,105 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../t-text-container/travel-element-styles.html" />
+<link rel="import" href="../iron-flex-layout/iron-flex-layout-classes.html" />
+<link rel="import" href="../juicy-html/juicy-html.html">
+<link rel="import" href="../t-overlay/t-overlay.html">
+<link rel="import" href="t-policy-provider.html">
+<!--
+    `<t-policy>` component provides a link to show policies. On clicking it, shows the polices.
+-->
+<dom-module id="t-policy">
+    <template>
+        <style include="iron-flex"></style>
+        <style include="travel-element-styles"></style>
+        <label class="link-style" on-tap="_initiateFareCall">[[label]]</label>
+        <t-overlay id="overlay" header="[[label]]">
+            <template is="dom-if" if="{{_policyLoading}}">
+                <div class="section font-14 text-center">
+                    Please wait, we are fetching [[label]] for your selected itinerary.
+                </div>
+                <div class="horizontal layout flex center-justified">
+                    <t-loader active></t-loader>
+                </div>
+            </template>
+            <template is="dom-if" if="{{_policyFailed}}">
+                <t-notify active message="Sorry we are having difficulties fetching [[label]]."></t-notify>
+            </template>
+            <div class="section">
+                <template is="dom-repeat" items="{{_policies}}">
+                    <template is="dom-if" if="[[item.policies.length]]">
+                        <div class="font-16 border-bottom margin-bottom">[[item.type]]</div>
+                        <template is="dom-repeat" items="{{item.policies}}" as="policy">
+                            <div class="font-12 margin-bottom">
+                                <template is="juicy-html" content$="[[policy]]" ></template>                        
+                            </div>
+                        </template>             
+                    </template>    
+                </template>
+            </div>
+        </t-overlay>
+        <t-policy-provider
+            id="PolicyProvider" 
+            api-relative-url="[[apiRelativeUrl]]" 
+            api-base-url="[[apiBaseUrl]]"
+            auth-token="[[authToken]]"
+            search-id="[[searchId]]"
+            inventory-id="[[inventoryId]]"
+            on-policy-success="_onPolicySuccess"
+            on-policy-error="_onPolicyError">
+        </t-policy-provider>
+    </template>
+    
+        <script>
+        Polymer({
+            is: 't-policy',
+
+            properties: {
+
+                label: String,
+
+                inventoryId: String,
+
+                searchId: String,
+
+                authToken: String,
+
+                apiRelativeUrl: String,
+
+                _policies: Array
+            },
+
+            _onPolicySuccess: function (event) {
+                if (!this._policies) {
+                    if (event.detail.addToCartItemResult && event.detail.addToCartItemResult.length && event.detail.addToCartItemResult[0].inventory && event.detail.addToCartItemResult[0].inventory.generalPolicies) {
+                        this._policies = event.detail.addToCartItemResult[0].inventory.generalPolicies;
+                    } else {
+                        this._onPolicyError();
+                    }
+                }
+                this._policyLoading = false;
+                this._policyFailed = false;
+            },
+
+            _onPolicyError: function (event) {
+                this._policyLoading = false;
+                this._policyFailed = true;
+            },
+
+            /**
+             * This method will initiate a call to Policies
+             */
+            _initiateFareCall: function () {
+                //active overlay
+                this.$.overlay.active = true;
+
+                if (!this._policies) {
+                    //make call to provider
+                    this._policyLoading = true;
+                    this._policyFailed = false;
+                    this._policies = null;
+                    this.$.PolicyProvider.getPolicies();
+                }
+            }
+        });
+        </script>
+</dom-module>
