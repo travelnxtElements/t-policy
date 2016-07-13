@@ -10,8 +10,13 @@
 <dom-module id="t-policy">
     <template>
         <style include="iron-flex"></style>
-        <style include="travel-element-styles"></style>
-        <label class="link-style" on-tap="_initiateFareCall">[[label]]</label>
+        <style include="travel-element-styles">
+            :host {
+                display: block;
+                font-family: var(--primary-font-family, 'Open Sans');
+            }
+        </style>
+        <label class="link-style font-12" on-tap="initiatePolicyCall" hidden$="[[externalLink]]">[[label]]</label>
         <t-overlay id="overlay" header="[[label]]">
             <template is="dom-if" if="{{_policyLoading}}">
                 <div class="section font-14 text-center">
@@ -25,7 +30,7 @@
                 <t-notify active message="Sorry we are having difficulties fetching [[label]]."></t-notify>
             </template>
             <div class="section">
-                <template is="dom-repeat" items="{{_policies}}">
+                <template is="dom-repeat" items="{{policies}}">
                     <template is="dom-if" if="[[item.policies.length]]">
                         <div class="font-16 border-bottom margin-bottom">[[item.type]]</div>
                         <template is="dom-repeat" items="{{item.policies}}" as="policy">
@@ -65,39 +70,63 @@
 
                 apiRelativeUrl: String,
 
-                _policies: Array
+                externalLink: {
+                    type: Boolean,
+                    value: false
+                },
+
+                _policyLoading: {
+                    type: Boolean,
+                    computed: '_computeIfPolicy(policies, _policyFailed)'
+                },
+
+                policies: Array,
+
+                isDataProvidedByView: {
+                    type: Boolean,
+                    value: false
+                }
             },
 
             _onPolicySuccess: function (event) {
-                if (!this._policies) {
+                if (!this.policies) {
                     if (event.detail.addToCartItemResult && event.detail.addToCartItemResult.length && event.detail.addToCartItemResult[0].inventory && event.detail.addToCartItemResult[0].inventory.generalPolicies) {
-                        this._policies = event.detail.addToCartItemResult[0].inventory.generalPolicies;
+                        this.policies = event.detail.addToCartItemResult[0].inventory.generalPolicies;
                     } else {
                         this._onPolicyError();
                     }
                 }
-                this._policyLoading = false;
                 this._policyFailed = false;
             },
 
+            _computeIfPolicy: function (policies, _policyFailed) {
+                if (policies) {
+                    return false;
+                }
+                if (_policyFailed) {
+                    return false;
+                }
+                return true;
+            },
+
             _onPolicyError: function (event) {
-                this._policyLoading = false;
                 this._policyFailed = true;
             },
 
             /**
              * This method will initiate a call to Policies
              */
-            _initiateFareCall: function () {
+            initiatePolicyCall: function () {
                 //active overlay
                 this.$.overlay.active = true;
 
-                if (!this._policies) {
+                if (!this.policies) {
                     //make call to provider
-                    this._policyLoading = true;
                     this._policyFailed = false;
-                    this._policies = null;
-                    this.$.PolicyProvider.getPolicies();
+                    this.policies = null;
+                    if (!this.isDataProvidedByView) {
+                        this.$.PolicyProvider.getPolicies();
+                    }
                 }
             }
         });
