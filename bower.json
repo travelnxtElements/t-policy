@@ -1,5 +1,9 @@
 {
   "name": "t-policy",
+  "version": "0.0.0",
+  "authors": [
+    "Manoj Chalode <chalodem@gmail.com>"
+  ],
   "description": "This component provides a customised link. It accepts inputs such as label, inventory id, search id, api base url, relative url. On clicking on link, overlay will be opened and in background ajax call will be placed. The resonse from call will be displayed on overlay.",
   "main": "t-policy.html",
   "dependencies": {
