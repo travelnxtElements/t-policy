@@ -50,7 +50,7 @@
             search-id="[[searchId]]"
             inventory-id="[[inventoryId]]"
             on-policy-success="_onPolicySuccess"
-            on-policy-error="_onPolicyError">
+            on-policy-error="onPolicyError">
         </t-policy-provider>
     </template>
     
@@ -93,7 +93,7 @@
                     if (event.detail.addToCartItemResult && event.detail.addToCartItemResult.length && event.detail.addToCartItemResult[0].inventory && event.detail.addToCartItemResult[0].inventory.generalPolicies) {
                         this.policies = event.detail.addToCartItemResult[0].inventory.generalPolicies;
                     } else {
-                        this._onPolicyError();
+                        this.onPolicyError();
                     }
                 }
                 this._policyFailed = false;
@@ -109,8 +109,13 @@
                 return true;
             },
 
-            _onPolicyError: function (event) {
+            onPolicyError: function (event) {
                 this._policyFailed = true;
+            },
+
+            initiatePolicyView: function (event) {
+                //hide overlay
+                this.$.overlay.active = false;
             },
 
             /**
