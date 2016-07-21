@@ -8,13 +8,13 @@
   "main": "t-policy.html",
   "dependencies": {
     "polymer": "Polymer/polymer#^1.4.0",
-    "iron-flex-layout": "PolymerElements/iron-flex-layout#^1.0.0",
-    "iron-ajax": "PolymerElements/iron-ajax#1.0.0",
-    "t-notify": "atomelements/t-notify#0.0.0",
-    "t-loader": "atomelements/t-loader#0.0.0",
-    "t-overlay": "atomelements/t-overlay#0.0.0",
-    "t-text-container": "travelnxtElements/t-text-container#0.0.0",
-    "t-shared-lib": "travelnxtElements/t-shared-lib#master"
+    "iron-flex-layout": "PolymerElements/iron-flex-layout#^1.2.1",
+    "iron-ajax": "PolymerElements/iron-ajax#^1.1.0",
+    "t-notify": "atomelements/t-notify#^1.1.1",
+    "t-loader": "atomelements/t-loader#^1.0.0",
+    "t-overlay": "atomelements/t-overlay#^1.0.0",
+    "t-text-container": "travelnxtElements/t-text-container#^1.0.0",
+    "t-shared-lib": "travelnxtElements/t-shared-lib#^1.0.0"
   },
   "devDependencies": {
     "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",
