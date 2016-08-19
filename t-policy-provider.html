@@ -44,16 +44,10 @@
         properties: {
 
             /**
-             * Search results id returned in listing response
-             * @type {String}
+             * Policy Request object
+             * @type {Object}
              */
-            searchId: String,
-
-            /**
-             * Selected flight id returned in itinerary level
-             * @type {String}
-             */
-            inventoryId: String,
+            policyRequest: Object,
 
             /**
              * The ajax request object
@@ -79,22 +73,15 @@
          * @return {[Void]}
          */
         getPolicies: function () {
-            var provider = this;
-
-            var buildReq = function (provider) {
-                var serviceModel = {
-                    itemInfos : [{
-                        "searchId": provider.searchId,
-                        "inventoryId": provider.inventoryId
-                    }]
-                };
-                return serviceModel;
+            if (!this.policyRequest) {
+                console.error("Policy request is not set");
+                return;
             }
 
             //validate api data before initiating call
             if (this._validateApiMeta()) {
                 this.$.ajaxCall.url = this._getUrl();
-                this.$.ajaxCall.body = JSON.stringify(buildReq(this));
+                this.$.ajaxCall.body = JSON.stringify(this.policyRequest);
                 this.$.ajaxCall.generateRequest();
             }
         },

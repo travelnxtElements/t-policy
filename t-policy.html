@@ -72,8 +72,7 @@
             api-relative-url="[[apiRelativeUrl]]" 
             api-base-url="[[apiBaseUrl]]"
             auth-token="[[authToken]]"
-            search-id="[[searchId]]"
-            inventory-id="[[inventoryId]]"
+            policy-request="[[policyRequest]]"
             on-policy-success="_onPolicySuccess"
             on-policy-error="onPolicyError">
         </t-policy-provider>
@@ -96,16 +95,10 @@
                     label: String,
 
                     /**
-                     * Stores inventory id of selected inventory
-                     * @type {String}
+                     * Policy Request object
+                     * @type {Object}
                      */
-                    inventoryId: String,
-
-                    /**
-                     * Stores search id of recent search
-                     * @type {String}
-                     */
-                    searchId: String,
+                    policyRequest: Object,
 
                     /**
                      * Stores auth token of apis
