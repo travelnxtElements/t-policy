@@ -149,7 +149,11 @@
                      * Array of policies
                      * @type {Array}
                      */
-                    policies: Array,
+                    policies: {
+                        type: Array,
+                        notify: true,
+                        observer: '_onPoliciesChange'
+                    },
 
                     /**
                      * This is true if policies are provided by view itself. In that case no need to set `searchId`, `inventoryId`, `apiRelativeUrl`, `authToken`
@@ -210,13 +214,19 @@
                  * @return {[Boolean]}
                  */
                 _computeIfPolicy: function (policies, _policyFailed) {
-                    if (policies) {
+                    if (policies && policies.length) {
                         return false;
                     }
                     if (_policyFailed) {
                         return false;
                     }
                     return true;
+                },
+
+                _onPoliciesChange: function () {
+                    if (!this.policies && this.isDataProvidedByView) {
+                        this.initiatePolicyView();
+                    }
                 },
 
                 /**
