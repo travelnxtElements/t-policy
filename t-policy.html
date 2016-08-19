@@ -169,12 +169,38 @@
                 _onPolicySuccess: function (event) {
                     if (!this.policies) {
                         if (event.detail.addToCartItemResult && event.detail.addToCartItemResult.length && event.detail.addToCartItemResult[0].inventory && event.detail.addToCartItemResult[0].inventory.generalPolicies) {
+
+                            // __TODO__ To be removed once this is fixed from mystique
+                            if (event.detail.addToCartItemResult[0].inventory.type == "Activity") {
+                                this._updatePolicies(event.detail.addToCartItemResult[0].inventory);
+                            }
+
                             this.policies = event.detail.addToCartItemResult[0].inventory.generalPolicies;
                         } else {
                             this.onPolicyError();
                         }
                     }
                     this._policyFailed = false;
+                },
+
+
+                /*
+                   * Translate plicies to make them policy component compatible
+                */
+                _updatePolicies: function (itinerary) {
+
+                    //Extra translator method because different policy response structure in activity.
+                    var policies = [];
+                    if (itinerary && itinerary.generalPolicies) {
+
+                        for (var i = 0; i < itinerary.generalPolicies.length; i++) {
+                            policies.push({
+                                policies: [itinerary.generalPolicies[i].value],
+                                type: itinerary.generalPolicies[i].key
+                            });
+                        }
+                        itinerary.generalPolicies = policies;
+                    }
                 },
 
                 /**
