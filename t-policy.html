@@ -42,7 +42,7 @@
             }
         </style>
         <label class="link-style font-12" on-tap="initiatePolicyCall" hidden$="[[externalLink]]">[[label]]</label>
-        <t-overlay id="overlay" header="[[label]]">
+        <t-overlay id="overlay" header="[[label]]" icon="[[headerIcon]]">
             <template is="dom-if" if="{{_policyLoading}}">
                 <div class="section font-14 text-center">
                     Please wait, we are fetching [[label]] for your selected itinerary.
@@ -156,12 +156,22 @@
                     },
 
                     /**
-                     * This is true if policies are provided by view itself. In that case no need to set `searchId`, `inventoryId`, `apiRelativeUrl`, `authToken`
+                     * This is true if policies are provided by view itself.
+                     * In that case no need to set `searchId`, `inventoryId`, `apiRelativeUrl`, `authToken`
                      * @type {Object}
                      */
                     isDataProvidedByView: {
                         type: Boolean,
                         value: false
+                    },
+
+                    /**
+                     * Customizable header icon 
+                     * @type {String}
+                     */
+                    headerIcon : {
+                        type: String,
+                        value: 'arrow-back'
                     }
                 },
 
@@ -172,7 +182,10 @@
                  */
                 _onPolicySuccess: function (event) {
                     if (!this.policies) {
-                        if (event.detail.addToCartItemResult && event.detail.addToCartItemResult.length && event.detail.addToCartItemResult[0].inventory && event.detail.addToCartItemResult[0].inventory.generalPolicies) {
+                        if (event.detail.addToCartItemResult 
+                            && event.detail.addToCartItemResult.length 
+                            && event.detail.addToCartItemResult[0].inventory 
+                            && event.detail.addToCartItemResult[0].inventory.generalPolicies) {
 
                             // __TODO__ To be removed once this is fixed from mystique
                             if (event.detail.addToCartItemResult[0].inventory.type == "Activity") {
