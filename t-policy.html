@@ -45,14 +45,14 @@
         <t-overlay id="overlay" header="[[label]]" icon="[[headerIcon]]">
             <template is="dom-if" if="{{_policyLoading}}">
                 <div class="section font-14 text-center">
-                    Please wait, we are fetching [[label]] for your selected itinerary.
+                    Please wait, we are getting [[label]] for your selected itinerary.
                 </div>
                 <div class="horizontal layout flex center-justified">
                     <t-loader active></t-loader>
                 </div>
             </template>
-            <template is="dom-if" if="{{_policyFailed}}">
-                <t-notify active message="Sorry we are having difficulties fetching [[label]]."></t-notify>
+            <template is="dom-if" if="{{policyFailed}}">
+                <t-notify active message="Sorry we are having difficulties in getting [[label]]."></t-notify>
             </template>
             <div class="section">
                 <template is="dom-repeat" items="{{policies}}">
@@ -133,14 +133,14 @@
                      */
                     _policyLoading: {
                         type: Boolean,
-                        computed: '_computeIfPolicy(policies, _policyFailed)'
+                        computed: '_computeIfPolicy(policies, policyFailed)'
                     },
 
                     /**
-                     * True if policy call fails
+                     * True if policies do not retrieved
                      * @type {Boolean}
                      */
-                    _policyFailed: {
+                    policyFailed: {
                         type: Boolean,
                         value: false
                     },
@@ -197,7 +197,7 @@
                             this.onPolicyError();
                         }
                     }
-                    this._policyFailed = false;
+                    this.policyFailed = false;
                 },
 
 
@@ -223,14 +223,14 @@
                 /**
                  * This method computes `policyLoading`
                  * @param  {[Array]} policies
-                 * @param  {[Boolean]} _policyFailed
+                 * @param  {[Boolean]} policyFailed
                  * @return {[Boolean]}
                  */
-                _computeIfPolicy: function (policies, _policyFailed) {
+                _computeIfPolicy: function (policies, policyFailed) {
                     if (policies && policies.length) {
                         return false;
                     }
-                    if (_policyFailed) {
+                    if (policyFailed) {
                         return false;
                     }
                     return true;
@@ -247,7 +247,7 @@
                  * @return {[Void]}
                  */
                 onPolicyError: function () {
-                    this._policyFailed = true;
+                    this.policyFailed = true;
                 },
 
                 /**
@@ -269,7 +269,7 @@
 
                     if (!this.policies) {
                         //make call to provider
-                        this._policyFailed = false;
+                        this.policyFailed = false;
                         this.policies = null;
                         if (!this.isDataProvidedByView) {
                             this.$.PolicyProvider.getPolicies();
