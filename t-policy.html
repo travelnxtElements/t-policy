@@ -185,7 +185,8 @@
                         if (event.detail.addToCartItemResult 
                             && event.detail.addToCartItemResult.length 
                             && event.detail.addToCartItemResult[0].inventory 
-                            && event.detail.addToCartItemResult[0].inventory.generalPolicies) {
+                            && event.detail.addToCartItemResult[0].inventory.generalPolicies
+                            && event.detail.addToCartItemResult[0].inventory.generalPolicies.length) {
 
                             // __TODO__ To be removed once this is fixed from mystique
                             if (event.detail.addToCartItemResult[0].inventory.type == "Activity") {
@@ -195,6 +196,7 @@
                             this.policies = event.detail.addToCartItemResult[0].inventory.generalPolicies;
                         } else {
                             this.onPolicyError();
+                            return;
                         }
                     }
                     this.policyFailed = false;
