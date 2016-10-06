@@ -54,17 +54,40 @@
             <template is="dom-if" if="{{policyFailed}}">
                 <t-notify active message="Sorry we are having difficulties in getting [[label]]."></t-notify>
             </template>
-            <div class="section">
+            <div class="section" hidden$="[[!_showPolicySection]]">
                 <template is="dom-repeat" items="{{policies}}">
                     <template is="dom-if" if="[[item.policies.length]]">
                         <div class="font-16 border-bottom margin-bottom">[[item.type]]</div>
                         <template is="dom-repeat" items="{{item.policies}}" as="policy">
                             <div class="font-12 margin-bottom-medium">
-                                <template is="juicy-html" content$="[[policy]]" ></template>                        
+                                <template is="juicy-html" content$="[[policy]]" ></template>
                             </div>
                         </template>             
                     </template>    
                 </template>
+                <div hidden$="[[!showOtherPolicies]]">
+                    <div class="font-16 border-bottom margin-bottom">[[otherPoliciesLabel]]</div>
+                    <template is="dom-repeat" items="[[otherPolicies]]">
+                        <div hidden$="[[!item.isQuantifiable]]">
+                            <div hidden$="[[!item.penalty.totalFare.amount]]">
+                                <div class="font-12 margin-bottom-medium" hidden$="[[!item.isSameDay]]">
+                                    Cancellation on [[item.window.start.date]] will incur cancellation charges of [[item.penalty.totalFare.displayAmount]].
+                                </div>
+                                <div class="font-12 margin-bottom-medium" hidden$="[[item.isSameDay]]">
+                                    Cancellation between [[item.window.start.date]] and [[item.window.end.date]] will incur cancellation charges of [[item.penalty.totalFare.displayAmount]].
+                                </div>
+                            </div>
+                            <template is="dom-if" if="[[!item.penalty.totalFare.amount]]">
+                                <div class="font-12 margin-bottom-medium">
+                                    Cancellation of reservation before [[item.window.end.date]] is free
+                                </div>
+                            </template>
+                        </div>
+                        <div class="font-12 margin-bottom-medium" hidden$="[[item.isQuantifiable]]">
+                            <template is="juicy-html" content$="[[item.description]]"></template>
+                        </div>
+                    </template>
+                </div>
             </div>
         </t-overlay>
         <t-policy-provider
@@ -133,7 +156,13 @@
                      */
                     _policyLoading: {
                         type: Boolean,
-                        computed: '_computeIfPolicy(policies, policyFailed)'
+                        computed: '_computeIfPolicy(policies, otherPolicies, policyFailed)',
+                        value: true
+                    },
+
+                    _showPolicySection: {
+                        type: Boolean,
+                        computed: '_showPolicies(_policyLoading, policyFailed)',
                     },
 
                     /**
@@ -172,6 +201,22 @@
                     headerIcon : {
                         type: String,
                         value: 'arrow-back'
+                    },
+
+                    showOtherPolicies: {
+                        type: Boolean,
+                        value: false
+                    },
+
+                    otherPoliciesLabel: {
+                        type: String,
+                        value: 'Policies'
+                    },
+
+                    otherPolicies: {
+                        type: Array,
+                        notify: true,
+                        observer: '_onGeneralPoliciesChange'
                     }
                 },
 
@@ -181,27 +226,50 @@
                  * @return {[Void]}
                  */
                 _onPolicySuccess: function (event) {
+                    var containsPolicy = false;
                     if (!this.policies) {
                         if (event.detail.addToCartItemResult 
                             && event.detail.addToCartItemResult.length 
-                            && event.detail.addToCartItemResult[0].inventory 
-                            && event.detail.addToCartItemResult[0].inventory.generalPolicies
-                            && event.detail.addToCartItemResult[0].inventory.generalPolicies.length) {
+                            && event.detail.addToCartItemResult[0].inventory) {
 
-                            // __TODO__ To be removed once this is fixed from mystique
-                            if (event.detail.addToCartItemResult[0].inventory.type == "Activity") {
-                                this._updatePolicies(event.detail.addToCartItemResult[0].inventory);
+                            var inventory = event.detail.addToCartItemResult[0].inventory;
+                            if (inventory.generalPolicies
+                                && inventory.generalPolicies.length) {
+                                // __TODO__ To be removed once this is fixed from mystique
+                                if (inventory.type == "Activity") {
+                                    this._updatePolicies(inventory);
+                                }
+                                this.policies = inventory.generalPolicies;
+                                containsPolicy = true;
                             }
-
-                            this.policies = event.detail.addToCartItemResult[0].inventory.generalPolicies;
-                        } else {
-                            this.onPolicyError();
-                            return;
+                            if (inventory.policies && inventory.policies.length) {
+                                this.otherPolicies = this._decorateOtherPolicies(inventory.policies);
+                                containsPolicy = true;
+                            }
                         }
+                    }
+                    if (!containsPolicy) {
+                        this.onPolicyError();
+                        return;
                     }
                     this.policyFailed = false;
                 },
 
+                _decorateOtherPolicies: function (policies) {
+                    policies.forEach(function (policy) {
+                        if (policy.penalty.components && policy.penalty.components.length) {
+                            var fareComponents = policy.penalty.components;
+                            for (var i = 0; i < fareComponents.length; i++) {
+                                if (fareComponents[i].type.toLowerCase() == "totalfare") {
+                                    policy.penalty.totalFare = fareComponents[i].money;
+                                }
+                            }
+                        }
+                        policy.isSameDay = policy.window.start.date == policy.window.end.date;
+                    });
+                    
+                    return policies;
+                },
 
                 /*
                    * Translate plicies to make them policy component compatible
@@ -225,21 +293,37 @@
                 /**
                  * This method computes `policyLoading`
                  * @param  {[Array]} policies
+                 * @param  {[Array]} otherPolicies
                  * @param  {[Boolean]} policyFailed
                  * @return {[Boolean]}
                  */
-                _computeIfPolicy: function (policies, policyFailed) {
+                _computeIfPolicy: function (policies, otherPolicies, policyFailed) {
                     if (policies && policies.length) {
                         return false;
                     }
+
+                    if (this.showOtherPolicies && otherPolicies && otherPolicies.length) {
+                        return false;
+                    }
+
                     if (policyFailed) {
                         return false;
                     }
                     return true;
                 },
 
+                _showPolicies: function (_policyLoading, policyFailed) {
+                    return !_policyLoading && !policyFailed;
+                },
+
                 _onPoliciesChange: function () {
                     if (!this.policies && this.isDataProvidedByView) {
+                        this.initiatePolicyView();
+                    }
+                },
+
+                _onGeneralPoliciesChange: function () {
+                    if (!this.generalPolicies && this.isDataProvidedByView) {
                         this.initiatePolicyView();
                     }
                 },
@@ -273,6 +357,7 @@
                         //make call to provider
                         this.policyFailed = false;
                         this.policies = null;
+                        this.otherPolicies = null;
                         if (!this.isDataProvidedByView) {
                             this.$.PolicyProvider.getPolicies();
                         }
