@@ -156,7 +156,7 @@
                      */
                     _policyLoading: {
                         type: Boolean,
-                        computed: '_computeIfPolicy(policies, otherPolicies, policyFailed)',
+                        computed: '_computeIfPolicy(policies, policyFailed)',
                         value: true
                     },
 
@@ -297,14 +297,14 @@
                  * @param  {[Boolean]} policyFailed
                  * @return {[Boolean]}
                  */
-                _computeIfPolicy: function (policies, otherPolicies, policyFailed) {
+                _computeIfPolicy: function (policies, policyFailed) {
                     if (policies && policies.length) {
                         return false;
                     }
 
-                    if (this.showOtherPolicies && otherPolicies && otherPolicies.length) {
-                        return false;
-                    }
+                    //if (this.showOtherPolicies && otherPolicies && otherPolicies.length) {
+                    //    return false;
+                    //}
 
                     if (policyFailed) {
                         return false;
@@ -354,11 +354,11 @@
                     this.$.overlay.active = true;
 
                     if (!this.policies) {
-                        //make call to provider
-                        this.policyFailed = false;
-                        this.policies = null;
-                        this.otherPolicies = null;
                         if (!this.isDataProvidedByView) {
+                            //make call to provider
+                            this.policyFailed = false;
+                            this.policies = null;
+                            this.otherPolicies = null;
                             this.$.PolicyProvider.getPolicies();
                         }
                     }
