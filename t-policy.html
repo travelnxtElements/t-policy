@@ -45,7 +45,7 @@
         <t-overlay id="overlay" header="[[label]]" icon="[[headerIcon]]">
             <template is="dom-if" if="{{_policyLoading}}">
                 <div class="section font-14 text-center">
-                    Please wait, we are getting [[label]] for your selected itinerary.
+                    Please wait, we are getting {{_toLowerCase(label)}} for your selected itinerary.
                 </div>
                 <div class="horizontal layout flex center-justified">
                     <t-loader active></t-loader>
@@ -253,6 +253,10 @@
                         return;
                     }
                     this.policyFailed = false;
+                },
+
+                _toLowerCase: function (item) {
+                    return item.toLowerCase();
                 },
 
                 _decorateOtherPolicies: function (policies) {
